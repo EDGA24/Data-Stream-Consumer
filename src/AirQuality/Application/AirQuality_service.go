@@ -1,5 +1,5 @@
 package application
-
+//prueva
 import (
 	entities "DataConsumer/src/AirQuality/Domain/Entities"
 	repositories "DataConsumer/src/AirQuality/Domain/Repositories"
