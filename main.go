@@ -4,6 +4,7 @@ import (
 	core "DataConsumer/Core"
 	"log"
 	"time"
+
 	middleware "DataConsumer/src/middleware"
 
 	airqualityrouter "DataConsumer/src/AirQuality/Infraestructure/Router"
@@ -75,7 +76,8 @@ func main() {
 	
 	// Grupo para rutas que requieren JSON (POST/PUT)
 	apiWithJSON := api.Group("")
-	apiWithJSON.Use(ValidateJSONContentType())
+	apiWithJSON.Use(ValidateContentType())
+	apiWithJSON.Use(ValidateRequestBodySize())
 
 	airqualityrouter.RegisterAirQualitySensorRoutes(apiWithJSON, airQualityCtrl)
 	lightrouter.RegisterLightSensorRoutes(apiWithJSON, lightCtrl)
