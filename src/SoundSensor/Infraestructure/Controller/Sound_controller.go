@@ -31,6 +31,20 @@ func (c *SoundSensorController) SaveSoundData(ctx *gin.Context) {
 		return
 	}
 
+	// Validate sensor data
+	if sensor.SensorID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "SensorID is required"})
+		return
+	}
+	if sensor.Nivel < 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Nivel must be non-negative"})
+		return
+	}
+	if sensor.Timestamp == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Timestamp is required"})
+		return
+	}
+
 	err := c.service.SaveSoundData(&sensor)
 	if err != nil {
 		log.Println("Error saving sound sensor data:", err)

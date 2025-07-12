@@ -26,6 +26,28 @@ func (c *AirQualityController) SaveAirQualityData(ctx *gin.Context) {
 		return
 	}
 
+	// Validar los datos del sensor
+	if sensor.ID <= 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+		return
+	}
+	if sensor.SensorID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "SensorID es requerido"})
+		return
+	}
+	if sensor.CO2PPM < 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "CO2PPM debe ser mayor o igual a 0"})
+		return
+	}
+	if sensor.Air_level < 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Air_level debe ser mayor o igual a 0"})
+		return
+	}
+	if sensor.Timestamp == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Timestamp es requerido"})
+		return
+	}
+
 	if err := c.service.SaveAirQualityData(&sensor); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar los datos en la base de datos"})
 		return

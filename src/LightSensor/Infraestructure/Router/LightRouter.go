@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterLightSensorRoutes(router *gin.Engine, lightSensorController *controller.LightController) {
-	lightSensorGroup := router.Group("/lightsensor")
+func RegisterLightSensorRoutes(apiWithJSON, lightSensorController *controller.LightController) {
+	lightSensorGroup := apiWithJSON.Group("/lightsensor")
 	{
 		lightSensorGroup.GET("/", lightSensorController.GetLightData)
 

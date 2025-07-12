@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterSoundSensorRoutes(router *gin.Engine, soundSensorController *controller.SoundSensorController) {
-	soundSensorGroup := router.Group("/soundsensor")
+func RegisterSoundSensorRoutes(apiWithJSON, soundSensorController *controller.SoundSensorController) {
+	soundSensorGroup := apiWithJSON.Group("/soundsensor")
 	{
 		soundSensorGroup.GET("/", soundSensorController.GetSoundData)
 

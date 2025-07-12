@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	middleware "DataConsumer/src/middleware"
+
 	airqualityrouter "DataConsumer/src/AirQuality/Infraestructure/Router"
 	lightrouter "DataConsumer/src/LightSensor/Infraestructure/Router"
 	soundrouter "DataConsumer/src/SoundSensor/Infraestructure/Router"
@@ -47,6 +49,8 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	api.Use
+
 	airQualityRepo := airqualitydb.NewAirQualityRepository(db)
 	lightRepo := lightdb.NewLightRepository(db)
 	temperatureRepo := tempdb.NewTemperatureHumidityRepository(db)
@@ -67,13 +71,21 @@ func main() {
 	temperatureCtrl := temperaturecontroller.NewTemperatureHumidityController(temperatureService)
 	soundCtrl := soundcontroller.NewSoundSensorController(soundService)
 
-	airqualityrouter.RegisterAirQualitySensorRoutes(router, airQualityCtrl)
-	lightrouter.RegisterLightSensorRoutes(router, lightCtrl)
-	temphumidityrouter.RegisterTemperatureHumidityRoutes(router, temperatureCtrl)
-	soundrouter.RegisterSoundSensorRoutes(router, soundCtrl)
+	// OPCIÓN 2: Crear grupos de rutas con validación específica
+	api := router.Group("/api/v1")
+	
+	// Grupo para rutas que requieren JSON (POST/PUT)
+	apiWithJSON := api.Group("")
+	apiWithJSON.Use(ValidateContentType())
+	apiWithJSON.Use(ValidateRequestBodySize())
+
+	airqualityrouter.RegisterAirQualitySensorRoutes(apiWithJSON, airQualityCtrl)
+	lightrouter.RegisterLightSensorRoutes(apiWithJSON, lightCtrl)
+	temphumidityrouter.RegisterTemperatureHumidityRoutes(apiWithJSON, temperatureCtrl)
+	soundrouter.RegisterSoundSensorRoutes(apiWithJSON, soundCtrl)
 
 	log.Println("Starting server on :8082")
-	if err := router.Run(":8082"); err != nil {
+	if err := apiWithJSON.Run(":8082"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }

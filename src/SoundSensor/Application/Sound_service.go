@@ -6,8 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"strings"
 	"sync"
-
+	"time"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,13 +19,6 @@ type SoundService struct {
 	mu        sync.Mutex
 }
 
-func (s *SoundService) RemoveClient(conn *websocket.Conn) {
-	panic("unimplemented")
-}
-
-func (s *SoundService) AddClient(conn *websocket.Conn) {
-	panic("unimplemented")
-}
 
 func NewSoundService(repo repositories.SoundSensor) *SoundService {
 	return &SoundService{
@@ -35,10 +29,31 @@ func NewSoundService(repo repositories.SoundSensor) *SoundService {
 }
 
 func (s *SoundService) SaveSoundData(sensor *entities.SoundSensor) error {
+	// ✅ Validación 1: Sensor nulo (ya existía)
 	if sensor == nil {
 		return errors.New("los datos del sensor de sonido son nulos")
 	}
 
+	// ✅ Validación 2: SensorID vacío - AGREGADO
+	if strings.TrimSpace(sensor.SensorID) == "" {
+		return errors.New("SensorID es requerido y no puede estar vacío")
+	}
+
+	// ✅ Validación 3: Nivel negativo o extremo - AGREGADO
+	if sensor.Nivel < 0 || sensor.Nivel > 120 {
+		return errors.New("Nivel de sonido debe estar entre 0 y 120 dB")
+	}
+
+	// ✅ Validación 4: Timestamp vacío y formato - AGREGADO
+	if strings.TrimSpace(sensor.Timestamp) == "" {
+		return errors.New("Timestamp es requerido")
+	}
+
+	if _, err := time.Parse(time.RFC3339, sensor.Timestamp); err != nil {
+		return errors.New("Timestamp debe tener formato RFC3339 válido")
+	}
+
+	// Continuar con lógica original
 	if err := s.repo.SaveSoundData(sensor); err != nil {
 		return err
 	}
@@ -49,6 +64,20 @@ func (s *SoundService) SaveSoundData(sensor *entities.SoundSensor) error {
 
 func (s *SoundService) GetSoundData() ([]*entities.SoundSensor, error) {
 	return s.repo.GetSoundData()
+}
+
+// ✅ CORREGIDO: Implementar métodos que estaban con panic - AGREGADO
+func (s *SoundService) AddClient(conn *websocket.Conn) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.clients[conn] = true
+}
+
+func (s *SoundService) RemoveClient(conn *websocket.Conn) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.clients, conn)
+	conn.Close()
 }
 
 func (s *SoundService) HandleWebSocketConnection(conn *websocket.Conn) {
@@ -89,3 +118,4 @@ func (s *SoundService) StartBroadcasting() {
 		s.mu.Unlock()
 	}
 }
+

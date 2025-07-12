@@ -29,6 +29,20 @@ func (c *LightController) SaveLightData(ctx *gin.Context) {
 		return
 	}
 
+	// Validar los datos del sensor
+	if lightData.SensorID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El campo 'sensor_id' es obligatorio"})
+		return
+	}
+	if lightData.Nivel < 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El campo 'nivel' debe ser mayor o igual a 0"})
+		return
+	}
+	if lightData.Timestamp == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El campo 'timestamp' es obligatorio"})
+		return
+	}
+
 	if err := c.service.SaveLightData(&lightData); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar los datos en la base de datos"})
 		return

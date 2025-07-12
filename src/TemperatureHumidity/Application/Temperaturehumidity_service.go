@@ -4,7 +4,9 @@ import (
 	entities "DataConsumer/src/TemperatureHumidity/Domain/Entities"
 	repositories "DataConsumer/src/TemperatureHumidity/Domain/Repositories"
 	"errors"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -25,10 +27,36 @@ func NewTemperatureHumidityService(repo repositories.TemperatureHumidityReposito
 }
 
 func (s *TemperatureHumidityService) SaveTemperatureHumidityData(sensor *entities.TemperatureHumiditySensor) error {
+	// ✅ Validación 1: Sensor nulo (ya existía)
 	if sensor == nil {
 		return errors.New("los datos del sensor de temperatura y humedad son nulos")
 	}
 
+	// ✅ Validación 2: SensorID vacío - AGREGADO
+	if strings.TrimSpace(sensor.SensorID) == "" {
+		return errors.New("SensorID es requerido y no puede estar vacío")
+	}
+
+	// ✅ Validación 3: Temperatura fuera de rango - AGREGADO
+	if sensor.Temperature < -50 || sensor.Temperature > 80 {
+		return errors.New("Temperatura debe estar entre -50 y 80 grados Celsius")
+	}
+
+	// ✅ Validación 4: Humedad fuera de rango - AGREGADO
+	if sensor.Humidity < 0 || sensor.Humidity > 100 {
+		return errors.New("Humedad debe estar entre 0 y 100 por ciento")
+	}
+
+	// ✅ Validación 5: Timestamp vacío y formato - AGREGADO
+	if strings.TrimSpace(sensor.Timestamp) == "" {
+		return errors.New("Timestamp es requerido")
+	}
+
+	if _, err := time.Parse(time.RFC3339, sensor.Timestamp); err != nil {
+		return errors.New("Timestamp debe tener formato RFC3339 válido")
+	}
+
+	// Continuar con lógica original
 	if err := s.repo.SaveTemperatureHumidityData(sensor); err != nil {
 		return err
 	}
