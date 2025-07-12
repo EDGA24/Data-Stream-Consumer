@@ -82,6 +82,7 @@ func main() {
 	// Validar response de campos vacios ya esta implementado
 	// validar response de errores ya esta implementado
 	// validar Cabecera de Cors ya esta implementado
+	// No hay validacion de WebSocket, ya que no se implementa en este momentogit
 
 	airqualityrouter.RegisterAirQualitySensorRoutes(apiWithJSON, airQualityCtrl)
 	lightrouter.RegisterLightSensorRoutes(apiWithJSON, lightCtrl)
