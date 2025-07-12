@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterTemperatureHumidityRoutes(router *gin.Engine, temperatureHumidityController *controller.TemperatureHumidityController) {
-	temperatureHumidityGroup := router.Group("/temperaturehumidity")
+func RegisterTemperatureHumidityRoutes(apiWithJSON, temperatureHumidityController *controller.TemperatureHumidityController) {
+	temperatureHumidityGroup := apiWithJSON.Group("/temperaturehumidity")
 	{
 		temperatureHumidityGroup.GET("/", temperatureHumidityController.GetTemperatureHumidityData)
 

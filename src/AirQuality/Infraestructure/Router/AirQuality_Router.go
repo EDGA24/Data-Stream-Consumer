@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterAirQualitySensorRoutes(router *gin.Engine, airQualitySensorController *controller.AirQualityController) {
-    airQualitySensorGroup := router.Group("/airqualitysensor")
+func RegisterAirQualitySensorRoutes(apiWithJSON, airQualitySensorController *controller.AirQualityController) {
+    airQualitySensorGroup := apiWithJSON.Group("/airqualitysensor")
     {
         airQualitySensorGroup.GET("/", airQualitySensorController.GetAirQualityData)
 
